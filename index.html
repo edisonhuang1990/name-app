@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>周易起名 | 宝宝取名</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>周易起名</h1>
+            <div class="subtitle">八字五行 · 易经卦象 · 顺遂安康</div>
+        </header>
+
+        <form id="namingForm">
+            <div class="form-group">
+                <label for="lastName">姓氏</label>
+                <input type="text" id="lastName" placeholder="请输入姓氏" required maxlength="2">
+            </div>
+
+            <div class="form-group">
+                <label for="gender">性别</label>
+                <select id="gender" required>
+                    <option value="male">男宝宝</option>
+                    <option value="female">女宝宝</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="birthDate">出生日期 (公历)</label>
+                <input type="date" id="birthDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="birthTime">出生时辰</label>
+                <select id="birthTime" required>
+                    <option value="0">子时 (23:00 - 00:59)</option>
+                    <option value="1">丑时 (01:00 - 02:59)</option>
+                    <option value="3">寅时 (03:00 - 04:59)</option>
+                    <option value="5">卯时 (05:00 - 06:59)</option>
+                    <option value="7">辰时 (07:00 - 08:59)</option>
+                    <option value="9">巳时 (09:00 - 10:59)</option>
+                    <option value="11">午时 (11:00 - 12:59)</option>
+                    <option value="13">未时 (13:00 - 14:59)</option>
+                    <option value="15">申时 (15:00 - 16:59)</option>
+                    <option value="17">酉时 (17:00 - 18:59)</option>
+                    <option value="19">戌时 (19:00 - 20:59)</option>
+                    <option value="21">亥时 (21:00 - 22:59)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit">立即测算起名</button>
+        </form>
+
+        <div id="results" class="results" style="display: none;">
+            <!-- Results will be injected here -->
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('namingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const lastName = document.getElementById('lastName').value;
+            const gender = document.getElementById('gender').value;
+            const birthDateStr = document.getElementById('birthDate').value;
+            const birthTimeStr = document.getElementById('birthTime').value;
+            
+            if (!lastName || !birthDateStr) {
+                alert('请填写完整信息');
+                return;
+            }
+            
+            const birthDate = new Date(birthDateStr);
+            const year = birthDate.getFullYear();
+            const month = birthDate.getMonth() + 1;
+            const day = birthDate.getDate();
+            const hour = parseInt(birthTimeStr);
+            
+            const results = generateNames(lastName, gender, { year, month, day, hour });
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            results.forEach(res => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <h3 class="name-title">${res.name}</h3>
+                    <div class="name-details">
+                        <p><strong>字义解析：</strong>${res.meaning}</p>
+                        <p><strong>五行补救：</strong><span class="tag">${res.analysis}</span> 选用元素：${res.elements}</p>
+                        <p><strong>周易卦象：</strong>${res.iching.name} —— ${res.iching.meaning}</p>
+                    </div>
+                    <div class="bazi-info">
+                        八字排盘：${res.bazi}
+                    </div>
+                `;
+                resultsDiv.appendChild(card);
+            });
+            
+            resultsDiv.style.display = 'block';
+        });
+    </script>
+</body>
+</html>
