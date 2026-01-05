@@ -54,7 +54,15 @@
         </form>
 
         <div id="results" class="results" style="display: none;">
-            <!-- Results will be injected here -->
+        </div>
+
+        <div class="results">
+            <div class="form-group">
+                <label for="amapAddress">高德地理编码测试地址</label>
+                <input type="text" id="amapAddress" placeholder="如：北京市海淀区中关村">
+            </div>
+            <button id="amapBtn" class="btn-submit" type="button">调用高德地理编码</button>
+            <div id="amapResult" class="bazi-info"></div>
         </div>
     </div>
 
@@ -103,6 +111,31 @@
             });
             
             resultsDiv.style.display = 'block';
+        });
+
+        document.getElementById('amapBtn').addEventListener('click', async function() {
+            const addr = document.getElementById('amapAddress').value.trim();
+            if (!addr) {
+                alert('请输入地址');
+                return;
+            }
+            try {
+                const resp = await fetch('/api/amap/geocode?address=' + encodeURIComponent(addr));
+                const data = await resp.json();
+                const out = document.getElementById('amapResult');
+                if (data.status === '1' && data.geocodes && data.geocodes.length > 0) {
+                    const g = data.geocodes[0];
+                    out.textContent = '定位成功：' + g.location + '（' + (g.formatted_address || addr) + '）';
+                } else if (data.error) {
+                    out.textContent = '错误：' + data.error;
+                } else if (data.infocode === '10009' || data.info === 'USERKEY_PLAT_NOMATCH') {
+                    out.innerHTML = '<span style="color:red">错误：Key类型不匹配 (USERKEY_PLAT_NOMATCH)</span><br>请确保您在高德控制台申请 Key 时，服务平台选择的是【<strong>Web服务</strong>】，而不是【Web端(JSAPI)】。';
+                } else {
+                    out.textContent = '未找到地址 (API返回: ' + JSON.stringify(data) + ')';
+                }
+            } catch (e) {
+                document.getElementById('amapResult').textContent = '调用失败: ' + e.message;
+            }
         });
     </script>
 </body>
